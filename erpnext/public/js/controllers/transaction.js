@@ -2014,7 +2014,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							if(args.items.length) {
 								me._set_values_for_item_list(r.message.children);
 								$.each(r.message.children || [], function(i, d) {
-									me.apply_discount_on_item(d, d.doctype, d.name, 'discount_percentage');
+									if (d.doctype && d.name)
+										me.apply_discount_on_item(d, d.doctype, d.name, 'discount_percentage');
 								});
 							}
 						},
