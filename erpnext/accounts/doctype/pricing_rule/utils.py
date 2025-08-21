@@ -11,6 +11,7 @@ import math
 import frappe
 from frappe import _, bold
 from frappe.utils import cint, flt, fmt_money, get_link_to_form, getdate, today
+from frappe import tweaks
 
 from erpnext.setup.doctype.item_group.item_group import get_child_item_groups
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
@@ -549,7 +550,7 @@ def get_qty_amount_data_for_cumulative(pr_doc, doc, items=None):
 	return [sum_qty, sum_amt]
 
 
-@frappe.tweaks.wrap_with_hook('apply_pricing_rule_on_transaction')
+@tweaks.wrap_with_hook('apply_pricing_rule_on_transaction')
 def apply_pricing_rule_on_transaction(doc):
 	conditions = "apply_on = 'Transaction'"
 
