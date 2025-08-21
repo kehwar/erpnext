@@ -549,6 +549,7 @@ def get_qty_amount_data_for_cumulative(pr_doc, doc, items=None):
 	return [sum_qty, sum_amt]
 
 
+@frappe.tweaks.wrap_with_hook('apply_pricing_rule_on_transaction')
 def apply_pricing_rule_on_transaction(doc):
 	conditions = "apply_on = 'Transaction'"
 
