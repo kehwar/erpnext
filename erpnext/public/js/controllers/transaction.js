@@ -2705,6 +2705,16 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			]);
 		}
 	}
+
+	reapply_pricing_rules() {
+		const _ignore_pricing_rule = this.frm.doc.ignore_pricing_rule;
+		return frappe.run_serially([
+			() => this.frm.doc.ignore_pricing_rule=1,
+			() => this.frm.trigger('ignore_pricing_rule'),
+			() => this.frm.doc.ignore_pricing_rule=_ignore_pricing_rule,
+			() => this.apply_pricing_rule(),
+		]);
+	}
 };
 
 erpnext.show_serial_batch_selector = function (frm, item_row, callback, on_close, show_dialog) {
