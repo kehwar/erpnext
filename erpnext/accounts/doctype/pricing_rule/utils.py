@@ -643,7 +643,7 @@ def get_applied_pricing_rules(pricing_rules):
 	return []
 
 
-@frappe.tweaks.wrap_with_hook('get_product_discount_rule')
+@tweaks.wrap_with_hook('get_product_discount_rule')
 def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 	free_item = pricing_rule.free_item
 	if pricing_rule.same_item and pricing_rule.get("apply_on") != "Transaction":
