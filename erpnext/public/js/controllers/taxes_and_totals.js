@@ -84,6 +84,8 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		}
 
 		this.frm.refresh_fields();
+
+		await this.frm.trigger("after_calculate_taxes_and_totals");
 	}
 
 	calculate_discount_amount() {
