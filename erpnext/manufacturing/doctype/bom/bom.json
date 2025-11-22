@@ -279,6 +279,7 @@
    "oldfieldtype": "Section Break"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
@@ -638,7 +639,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-16 16:13:22.497695",
+ "modified": "2025-10-29 17:43:12.966753",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

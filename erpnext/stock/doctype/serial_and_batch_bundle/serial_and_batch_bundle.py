@@ -253,6 +253,9 @@ class SerialandBatchBundle(Document):
 				}
 			)
 
+		if self.voucher_type == "Delivery Note":
+			kwargs["ignore_voucher_nos"] = self.get_sre_against_dn()
+
 		available_serial_nos = get_available_serial_nos(frappe._dict(kwargs))
 
 		serial_no_warehouse = {}
@@ -294,7 +297,7 @@ class SerialandBatchBundle(Document):
 			}
 		)
 
-		if self.returned_against and self.docstatus == 1:
+		if (self.returned_against or self.voucher_type == "Stock Reconciliation") and self.docstatus == 1:
 			kwargs["ignore_voucher_detail_no"] = self.voucher_detail_no
 
 		if self.docstatus == 1:
@@ -518,12 +521,15 @@ class SerialandBatchBundle(Document):
 				else:
 					d.incoming_rate = abs(flt(sn_obj.batch_avg_rate.get(d.batch_no)))
 
-				available_qty = flt(sn_obj.available_qty.get(d.batch_no), d.precision("qty"))
-				if self.docstatus == 1:
-					available_qty += flt(d.qty, d.precision("qty"))
+				precision = d.precision("qty")
+				for field in ["available_qty", "total_qty"]:
+					value = getattr(sn_obj, field)
+					available_qty = flt(value.get(d.batch_no), precision)
+					if self.docstatus == 1:
+						available_qty += flt(d.qty, precision)
 
-				if not allow_negative_stock:
-					self.validate_negative_batch(d.batch_no, available_qty)
+					if not allow_negative_stock:
+						self.validate_negative_batch(d.batch_no, available_qty)
 
 			d.stock_value_difference = flt(d.qty) * flt(d.incoming_rate)
 
@@ -664,8 +670,12 @@ class SerialandBatchBundle(Document):
 			if batches and valuation_method == "FIFO":
 				stock_queue = parse_json(prev_sle.stock_queue)
 
+		set_valuation_rate_for_rejected_materials = frappe.db.get_single_value(
+			"Buying Settings", "set_valuation_rate_for_rejected_materials"
+		)
+
 		for d in self.entries:
-			if self.is_rejected:
+			if self.is_rejected and not set_valuation_rate_for_rejected_materials:
 				rate = 0.0
 			elif (d.incoming_rate == rate) and not stock_queue and d.qty and d.stock_value_difference:
 				continue
@@ -1372,6 +1382,22 @@ class SerialandBatchBundle(Document):
 		frappe.qb.from_(SBBE).delete().where(SBBE.parent == self.name).run()
 
 		self.set("entries", [])
+
+	def get_sre_against_dn(self):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_sre_against_so_for_dn,
+		)
+
+		so_name, so_detail_no = frappe.db.get_value(
+			"Delivery Note Item", self.voucher_detail_no, ["against_sales_order", "so_detail"]
+		) or [None, None]
+
+		if so_name and so_detail_no:
+			sre_names = get_sre_against_so_for_dn(so_name, so_detail_no)
+
+			return sre_names
+
+		return None
 
 
 @frappe.whitelist()
@@ -2271,7 +2297,11 @@ def get_auto_batch_nos(kwargs):
 
 	stock_ledgers_batches = get_stock_ledgers_batches(kwargs)
 	pos_invoice_batches = get_reserved_batches_for_pos(kwargs)
-	sre_reserved_batches = get_reserved_batches_for_sre(kwargs)
+
+	sre_reserved_batches = frappe._dict()
+	if not kwargs.ignore_reserved_stock:
+		sre_reserved_batches = get_reserved_batches_for_sre(kwargs)
+
 	picked_batches = frappe._dict()
 	if kwargs.get("is_pick_list"):
 		picked_batches = get_picked_batches(kwargs)
@@ -2677,7 +2707,10 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 		else:
 			query = query.where(stock_ledger_entry[field] == kwargs.get(field))
 
-	if kwargs.voucher_no:
+	if kwargs.ignore_voucher_detail_no:
+		query = query.where(stock_ledger_entry.voucher_detail_no != kwargs.ignore_voucher_detail_no)
+
+	elif kwargs.voucher_no:
 		query = query.where(stock_ledger_entry.voucher_no != kwargs.voucher_no)
 
 	return query.run(as_dict=True)
