@@ -82,7 +82,7 @@ class ProductBundle(Document):
 
 	def validate_child_items(self):
 		for item in self.items:
-			if frappe.db.exists("Product Bundle", {"name": item.item_code, "disabled": 0}):
+			if frappe.db.exists("Product Bundle", {"new_item_code": item.item_code, "disabled": 0}):
 				frappe.throw(
 					_(
 						"Row #{0}: Child Item should not be a Product Bundle. Please remove Item {1} and Save"
