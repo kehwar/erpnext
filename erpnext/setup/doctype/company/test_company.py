@@ -14,7 +14,7 @@ from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import
 from erpnext.setup.doctype.company.company import get_default_company_address
 
 test_ignore = ["Account", "Cost Center", "Payment Terms Template", "Salary Component", "Warehouse"]
-test_dependencies = ["Fiscal Year"]
+test_dependencies = ["Fiscal Year", "Warehouse Type"]
 test_records = frappe.get_test_records("Company")
 
 
