@@ -31,7 +31,6 @@ jobs:
           git clone --filter=blob:none --sparse --depth=1 https://github.com/kehwar/frappe.git /tmp/frappe-repo
           cd /tmp/frappe-repo
           git sparse-checkout set .agents/skills
-          cd /workspace/development/frappe-bench/apps/erpnext
-          mkdir -p ./.github/skills
+          cd $GITHUB_WORKSPACE
           cp -r /tmp/frappe-repo/.agents/skills/* ./.github/skills/
           rm -rf /tmp/frappe-repo
