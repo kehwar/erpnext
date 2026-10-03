@@ -36,6 +36,10 @@ ERPNext as a monolith includes the following areas for managing businesses:
 
 ERPNext is built on the [Frappe Framework](https://github.com/frappe/frappe), a full-stack web app framework built with Python & JavaScript.
 
+## Fork customizations
+
+For this fork's capabilities, maintenance changes, and upstream-merge verification, see the [customization registry](docs/customizations/README.md).
+
 ## Installation
 
 <div align="center" style="max-height: 40px;">
